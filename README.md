@@ -1,3 +1,9 @@
+# vue3 组件模拟input，可以一边输入，一边高亮匹配关键字
+使用示例：
+<highlightInput v-model="myText" :keywords="keywords" :color="color" placeholder="关键字（鼠、润）"></highlightInput>
+参数：
+keywords: 关键字数组
+color: 高亮颜色
 # vue-highlight-input
 
 This template should help get you started developing with Vue 3 in Vite.
