@@ -6,7 +6,7 @@
 src/components/Demo.vue
 
 使用示例：
-\<highlightInput v-model="myText" :keywords="keywords" :color="color" placeholder="关键字（鼠、润）"></highlightInput>
+\<highlightInput v-model="myText" :keywords="keywords" :color="color" placeholder="请输入关键字"></highlightInput>
 
 参数：   
 keywords: 关键字数组    
