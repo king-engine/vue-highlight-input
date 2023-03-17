@@ -1,6 +1,6 @@
 # vue3 组件模拟input，可以一边输入，一边高亮匹配关键字
 使用示例：
-components/Demo.vue
+src/components/Demo.vue
 <highlightInput v-model="myText" :keywords="keywords" :color="color" placeholder="关键字（鼠、润）"></highlightInput>
 参数：
 keywords: 关键字数组
