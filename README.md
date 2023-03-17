@@ -1,6 +1,6 @@
 # vue3 组件模拟input，可以一边输入，一边高亮匹配关键字
 示例效果：
-![image](https://github.com/king-engine/readme/演示.png)
+![image](https://github.com/king-engine/vue-highlight-input/readme/demo_img.png)
 示例文件：
 src/components/Demo.vue
 使用示例：
