@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import {ref} from 'vue'
-import highlightInput from '@/components/HighlightInput.vue'
+// import highlightInput from '@/components/HighlightInput.vue'
 const myText = ref('')
 const keywords = ref(['鼠', '润'])
 const color = ref('#67C23A')

@@ -1,0 +1,19 @@
+{
+  "name": "vue3-highlight-input",
+  "version": "1.0.3",
+  "description": "一个输入vue组件，即时配置高亮关键字",
+  "main": "highlightInput.umd.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "vue",
+    "vue3",
+    "input",
+    "highlight",
+    "typescript"
+  ],
+  "author": "kingEngine",
+  "license": "ISC",
+  "repository": "https://github.com/king-engine/vue-highlight-input"
+}

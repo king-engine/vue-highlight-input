@@ -1,4 +1,10 @@
 <script lang="ts" setup>
+/**
+ * 接收组件参数
+ * @params modelValue v-model双向绑定输入值
+ * @params kewords 匹配关键字数组，例：['关键字1', '关键字2']
+ * @params color 匹配关键字高亮颜色 例：#333333
+ */
 import { nextTick, ref, watch } from 'vue'
 const inputHtml = ref('')
 const inputDom = ref()
@@ -22,9 +28,9 @@ const emit = defineEmits(['update:modelValue'])
 watch(() => props.modelValue, (val) => {
   formatText(val)
 })
-// 转义
+// 正则转义
 const escapeRegExp = (text: string) => {
-  return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return text.replace(/[\-\/\\\^\$\*\+\?\.\(\)\|\[\]\{\}]/g, '\\$&');
 }
 //关键字包裹
 const htmlText = (text: string | null, keywords: any[]) => {
@@ -94,6 +100,11 @@ const onInput = (e: Event) => {
 }
 </script>
 
+<script lang="ts">
+  export default {
+    name: 'HighlightInput'
+  }
+</script>
 <template>
   <div ref="inputDom" v-html="inputHtml" class="highlight-input" @input="onInput" @compositionstart="onCompositionStart"
     @compositionend="onCompositionEnd" contenteditable="true"></div>
