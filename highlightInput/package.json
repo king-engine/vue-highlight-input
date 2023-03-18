@@ -1,8 +1,8 @@
 {
   "name": "vue3-highlight-input",
-  "version": "1.0.3",
+  "version": "1.0.6",
   "description": "一个输入vue组件，即时配置高亮关键字",
-  "main": "highlightInput.umd.js",
+  "main": "highlightInput.mjs",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

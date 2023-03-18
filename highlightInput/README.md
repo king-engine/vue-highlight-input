@@ -8,7 +8,8 @@
 `npm i vue3-highlight-input`
 
 ## 在vue main.js中
-`import highlightInput from 'vue3-highlight-input'`
+`import highlightInput from 'vue3-highlight-input'`    
+`import 'vue3-highlight-input/style.css'`
 
 `app.use(highlightInput)`
 
