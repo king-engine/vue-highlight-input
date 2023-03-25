@@ -1,8 +1,8 @@
-import { defineComponent as w, ref as d, watch as k, nextTick as E, openBlock as S, createElementBlock as H } from "vue";
-const I = ["innerHTML"], $ = {
+import { defineComponent as H, ref as g, watch as N, nextTick as w, openBlock as A, createElementBlock as I } from "vue";
+const $ = ["innerHTML"], D = {
   name: "HighlightInput"
-}, A = /* @__PURE__ */ w({
-  ...$,
+}, V = /* @__PURE__ */ H({
+  ...D,
   props: {
     modelValue: {
       type: String,
@@ -18,69 +18,87 @@ const I = ["innerHTML"], $ = {
     }
   },
   emits: ["update:modelValue"],
-  setup(n, { emit: c }) {
-    const o = n, r = d(""), s = d();
-    let a = !1;
-    k(() => o.modelValue, (e) => {
-      p(e);
+  setup(s, { emit: p }) {
+    const c = s, a = g(""), r = g();
+    let i = !1;
+    N(() => c.modelValue, (t) => {
+      u(t);
     });
-    const g = (e) => e.replace(/[\-\/\\\^\$\*\+\?\.\(\)\|\[\]\{\}]/g, "\\$&"), _ = (e, t) => {
-      if (!e)
+    const _ = (t) => t.replace(/[\-\/\\\^\$\*\+\?\.\(\)\|\[\]\{\}]/g, "\\$&"), h = (t) => {
+      var e = "";
+      return t.length == 0 ? "" : (e = t.replace(/&/g, "&amp;"), e = e.replace(/</g, "&lt;"), e = e.replace(/>/g, "&gt;"), e = e.replace(/ /g, "&nbsp;"), e = e.replace(/\'/g, "&#39;"), e = e.replace(/\"/g, "&quot;"), e = e.replace(/\n/g, "<br/>"), e);
+    }, x = (t) => {
+      var e = "";
+      return t.length == 0 ? "" : (e = t.replace(/&amp;/g, "&"), e = e.replace(/&lt;/g, "<"), e = e.replace(/&gt;/g, ">"), e = e.replace(/&nbsp;/g, " "), e = e.replace(/&#39;/g, "'"), e = e.replace(/&quot;/g, '"'), e = e.replace(/<br\/>/g, `
+`), e);
+    }, v = (t, e) => {
+      if (!t)
         return "";
-      const l = new RegExp(
-        t.map((i) => g(String(i).trim())).join("|"),
+      const n = new RegExp(
+        e.map((l) => _(String(l).trim())).join("|"),
         "gi"
       );
-      return e.replace(/\t/g, "").replace(l, "	$&	").split(/\t/).map((i, C) => C % 2 === 0 ? i : `<span style="color: ${o.color}">${i}</span>`).join("");
-    }, h = (e) => {
-      if (window.getSelection) {
-        e.focus();
-        let t = window.getSelection();
-        t.selectAllChildren(e), t.collapseToEnd();
-      } else if (document.selection) {
-        let t = document.selection.createRange();
-        t.moveToElementText(e), t.collapse(!1), t.select();
-      }
-    }, x = (e, t) => {
-      let l = null;
-      return (...m) => {
-        l && (clearTimeout(l), l = null), l = setTimeout(() => {
-          e.apply(this, m);
-        }, t);
+      return t.replace(/\t/g, "").replace(n, "	$&	").split(/\t/).map((l, S) => S % 2 === 0 ? l : `<span style="color: ${c.color}">${l}</span>`).join("");
+    }, y = (t, e) => {
+      let n = null;
+      return (...o) => {
+        n && (clearTimeout(n), n = null), n = setTimeout(() => {
+          t.apply(this, o);
+        }, e);
       };
-    }, p = async (e) => {
-      r.value = _(e, o.keywords), await E(), h(s.value);
-    }, y = x(p, 300), T = () => {
-      a = !0;
-    }, v = (e) => {
-      a = !1, u(e);
-    }, u = (e) => {
-      if (!a) {
-        let t = e.target.textContent;
-        c("update:modelValue", String(t)), y(t);
+    }, u = async (t) => {
+      let e = T(r.value), n = h(t);
+      a.value = v(n, c.keywords), await w(), E(r.value, e);
+    }, T = (t) => {
+      var o;
+      t.focus();
+      let e = (o = document.getSelection()) == null ? void 0 : o.getRangeAt(0), n = e == null ? void 0 : e.cloneRange();
+      return n == null || n.selectNodeContents(t), n == null || n.setEnd(e == null ? void 0 : e.endContainer, e == null ? void 0 : e.endOffset), n == null ? void 0 : n.toString().length;
+    }, E = (t, e) => {
+      let n = getSelection(), o = d(r.value, { pos: e });
+      o && (o.collapse(!1), n == null || n.removeAllRanges(), n == null || n.addRange(o));
+    }, d = (t, e, n) => {
+      if (n || (n = document.createRange(), n.selectNode(t), n.setStart(t, 0)), e.pos === 0)
+        n.setEnd(t, e.pos);
+      else if (t && e.pos > 0)
+        if (t.nodeType === Node.TEXT_NODE) {
+          let l = t.textContent || "";
+          l.length < e.pos ? e.pos -= l.length : (n.setEnd(t, e.pos), e.pos = 0);
+        } else
+          for (var o = 0; o < t.childNodes.length && (n = d(t.childNodes[o], e, n), e.pos !== 0); o++)
+            ;
+      return n;
+    }, k = y(u, 300), C = () => {
+      i = !0;
+    }, R = (t) => {
+      i = !1, m(t);
+    }, m = (t) => {
+      if (!i) {
+        let e = t.target.textContent;
+        p("update:modelValue", x(e || "")), k(e);
       }
     };
-    return (e, t) => (S(), H("div", {
+    return (t, e) => (A(), I("div", {
       ref_key: "inputDom",
-      ref: s,
-      innerHTML: r.value,
+      ref: r,
+      innerHTML: a.value,
       class: "highlight-input",
-      onInput: u,
-      onCompositionstart: T,
-      onCompositionend: v,
+      onInput: m,
+      onCompositionstart: C,
+      onCompositionend: R,
       contenteditable: "true"
-    }, null, 40, I));
+    }, null, 40, $));
   }
 });
-const V = (n, c) => {
-  const o = n.__vccOpts || n;
-  for (const [r, s] of c)
-    o[r] = s;
-  return o;
-}, f = /* @__PURE__ */ V(A, [["__scopeId", "data-v-0cec6f78"]]), L = [f], B = {
-  install(n) {
-    L.forEach((c) => {
-      n.component(c.name, f);
+const L = (s, p) => {
+  const c = s.__vccOpts || s;
+  for (const [a, r] of p)
+    c[a] = r;
+  return c;
+}, f = /* @__PURE__ */ L(V, [["__scopeId", "data-v-bc8dd032"]]), O = [f], B = {
+  install(s) {
+    O.forEach((p) => {
+      s.component(p.name, f);
     });
   }
 };
