@@ -32,6 +32,33 @@ watch(() => props.modelValue, (val) => {
 const escapeRegExp = (text: string) => {
   return text.replace(/[\-\/\\\^\$\*\+\?\.\(\)\|\[\]\{\}]/g, '\\$&');
 }
+// html转义
+const htmlEncode = (str: string) => {
+  var s = "";
+  if (str.length == 0) return "";
+  s = str.replace(/&/g, "&amp;");
+  s = s.replace(/</g, "&lt;");
+  s = s.replace(/>/g, "&gt;");
+  s = s.replace(/ /g, "&nbsp;");
+  s = s.replace(/\'/g, "&#39;");
+  s = s.replace(/\"/g, "&quot;");
+  s = s.replace(/\n/g, "<br/>");
+  return s;
+}
+// html反转义
+const htmlDecode = (str: string) => {
+  var s = "";
+  if (str.length == 0) return "";
+  s = str.replace(/&amp;/g, "&");
+  s = s.replace(/&lt;/g, "<");
+  s = s.replace(/&gt;/g, ">");
+  s = s.replace(/&nbsp;/g, " ");
+  s = s.replace(/&#39;/g, "\'");
+  s = s.replace(/&quot;/g, "\"");
+  s = s.replace(/<br\/>/g, "\n");
+  return s;
+}
+
 //关键字包裹
 const htmlText = (text: string | null, keywords: any[]) => {
   if (!text) return ''
@@ -46,21 +73,8 @@ const htmlText = (text: string | null, keywords: any[]) => {
     return i % 2 === 0 ? str : `<span style="color: ${props.color}">${str}</span>`
   }).join('')
 }
-// 光标移动最后
-const caretToEnd = (obj: HTMLElement) => {
-  if (window.getSelection) {//ie11 10 9 ff safari
-    obj.focus(); //解决ff不获取焦点无法定位问题
-    let range: any = window.getSelection();//创建range
-    range.selectAllChildren(obj);//range 选择obj下所有子内容
-    range.collapseToEnd();//光标移至最后
-  } else if ((document as any).selection) {//ie10 9 8 7 6 5
-    let range = (document as any).selection.createRange();//创建选择对象
-    range.moveToElementText(obj);//range定位到obj
-    range.collapse(false);//光标移至最后
-    range.select();
-  }
-}
 
+// 防抖
 const debounce = (fn: Function, delay: number) => {
   let timer: null | number = null
   return (...arg: any[]) => {
@@ -75,9 +89,64 @@ const debounce = (fn: Function, delay: number) => {
 }
 
 const formatText = async (text: string) => {
-  inputHtml.value = htmlText(text, props.keywords)
+
+  let pos = getCaretPos(inputDom.value)
+
+  let encodeText = htmlEncode(text)
+  inputHtml.value = htmlText(encodeText, props.keywords)
   await nextTick()
-  caretToEnd(inputDom.value)
+
+  setCaretPos(inputDom.value, pos)
+}
+
+const getCaretPos = (el: HTMLElement) => {
+  el.focus()
+  let range = document.getSelection()?.getRangeAt(0) as Range
+  let rangeClone = range?.cloneRange()
+  rangeClone?.selectNodeContents(el)
+  rangeClone?.setEnd(range?.endContainer, range?.endOffset)
+  return rangeClone?.toString().length
+}
+const setCaretPos = (el: HTMLElement, pos: number) => {
+  let selection = getSelection()
+  let range = createRange(inputDom.value, {pos})
+  if (range) {
+    range.collapse(false)
+    selection?.removeAllRanges()
+    selection?.addRange(range)
+  }
+}
+
+type PosType = {
+  pos: number
+}
+const createRange = (node: Node, obj:PosType, range?: Range): Range => {
+  if (!range) {
+    range = document.createRange()
+    range.selectNode(node)
+    range.setStart(node, 0)
+  }
+  if (obj.pos === 0) {
+    range.setEnd(node, obj.pos)
+  } else if (node && obj.pos > 0) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      let text = node.textContent || ''
+      if (text.length < obj.pos) {
+        obj.pos -= text.length
+      } else {
+        range.setEnd(node, obj.pos)
+        obj.pos = 0
+      }
+    } else {
+      for (var lp = 0; lp < node.childNodes.length; lp++) {
+        range = createRange(node.childNodes[lp], obj, range)
+        if (obj.pos === 0) {
+          break
+        }
+      }
+    }
+  }
+  return range
 }
 
 const deFormatText = debounce(formatText, 300)
@@ -94,16 +163,16 @@ const onCompositionEnd = (e: Event) => {
 const onInput = (e: Event) => {
   if (!isLock) {
     let text = (e.target as HTMLElement).textContent
-    emit('update:modelValue', String(text))
+    emit('update:modelValue', htmlDecode(text || ''))
     deFormatText(text)
   }
 }
 </script>
 
 <script lang="ts">
-  export default {
-    name: 'HighlightInput'
-  }
+export default {
+  name: 'HighlightInput'
+}
 </script>
 <template>
   <div ref="inputDom" v-html="inputHtml" class="highlight-input" @input="onInput" @compositionstart="onCompositionStart"
@@ -122,9 +191,11 @@ const onInput = (e: Event) => {
   // 隐藏滚动条
   -ms-overflow-style: none;
   overflow: -moz-scrollbars-none;
+
   &::-webkit-scrollbar {
-    width: 0!important;
+    width: 0 !important;
   }
+
   &:focus-visible {
     outline-color: #409eff;
   }
@@ -137,4 +208,5 @@ const onInput = (e: Event) => {
   &:focus:before {
     content: '';
   }
-}</style>
+}
+</style>
