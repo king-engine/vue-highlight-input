@@ -1,6 +1,6 @@
 {
   "name": "vue3-highlight-input",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "一个输入vue组件，即时配置高亮关键字",
   "main": "highlightInput.mjs",
   "scripts": {
