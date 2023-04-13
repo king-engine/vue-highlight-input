@@ -2,7 +2,7 @@
 import {ref} from 'vue'
 // import highlightInput from '@/components/HighlightInput.vue'
 const myText = ref('')
-const keywords = ref(['鼠', '润'])
+const keywords = ref(['鼠鼠', '润'])
 const color = ref('#67C23A')
 </script>
 
@@ -12,7 +12,7 @@ const color = ref('#67C23A')
       <h1>看图说话</h1>
       <img src="@/assets/shushu.png" alt="">
     </header>
-    <highlightInput v-model="myText" :keywords="keywords" :color="color" placeholder="关键字（鼠、润）"></highlightInput>
+    <highlightInput v-model="myText" :keywords="keywords" :color="color" placeholder="关键字（鼠、润）" class="high-light"></highlightInput>
     <p>{{ myText }}</p>
   </div>
 </template>
@@ -28,6 +28,9 @@ const color = ref('#67C23A')
   }
   p {
     margin-top: 10px;
+  }
+  .high-light {
+    height: 200px;
   }
 }
 </style>

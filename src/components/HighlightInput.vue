@@ -162,10 +162,16 @@ const onCompositionEnd = (e: Event) => {
 }
 const onInput = (e: Event) => {
   if (!isLock) {
-    let text = (e.target as HTMLElement).textContent
+    let text = (e.target as HTMLElement).innerText
     emit('update:modelValue', htmlDecode(text || ''))
-    deFormatText(text)
+    // deFormatText(text)
   }
+}
+const onEnterDown = (e: Event) => {
+  isLock = true
+}
+const onEnterUp = (e: Event) => {
+  isLock = false
 }
 </script>
 
@@ -176,7 +182,7 @@ export default {
 </script>
 <template>
   <div ref="inputDom" v-html="inputHtml" class="highlight-input" @input="onInput" @compositionstart="onCompositionStart"
-    @compositionend="onCompositionEnd" contenteditable="true"></div>
+    @compositionend="onCompositionEnd" contenteditable="true" @keydown.enter="onEnterDown" @keyup.enter="onEnterUp"></div>
 </template>
 
 <style scoped lang='scss'>
