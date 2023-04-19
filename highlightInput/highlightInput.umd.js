@@ -1,2 +1,238 @@
-(function(l,o){typeof exports=="object"&&typeof module<"u"?o(exports,require("vue")):typeof define=="function"&&define.amd?define(["exports","vue"],o):(l=typeof globalThis<"u"?globalThis:l||self,o(l.highlightInput={},l.Vue))})(this,function(l,o){"use strict";const h=["innerHTML","onKeydown","onKeyup"],_={name:"HighlightInput"},y=o.defineComponent({..._,props:{modelValue:{type:String,default:""},keywords:{type:Array,default:[]},color:{type:String,default:"#F56C6C"}},emits:["update:modelValue"],setup(r,{emit:a}){const p=r,d=o.ref(""),i=o.ref();let u=!1;o.watch(()=>p.modelValue,t=>{k(t)});const T=t=>t.replace(/[\-\/\\\^\$\*\+\?\.\(\)\|\[\]\{\}]/g,"\\$&"),v=t=>{var e="";return t.length==0?"":(e=t.replace(/&/g,"&amp;"),e=e.replace(/</g,"&lt;"),e=e.replace(/>/g,"&gt;"),e=e.replace(/ /g,"&nbsp;"),e=e.replace(/\'/g,"&#39;"),e=e.replace(/\"/g,"&quot;"),e=e.replace(/\n/g,"<br/>"),e)},w=t=>{var e="";return t.length==0?"":(e=t.replace(/&amp;/g,"&"),e=e.replace(/&lt;/g,"<"),e=e.replace(/&gt;/g,">"),e=e.replace(/&nbsp;/g," "),e=e.replace(/&#39;/g,"'"),e=e.replace(/&quot;/g,'"'),e=e.replace(/<br\/>/g,`
-`),e)},S=(t,e)=>{if(!t)return"";const n=new RegExp(e.map(c=>T(String(c).trim())).join("|"),"gi");return t.replace(/\t/g,"").replace(n,"	$&	").split(/\t/).map((c,A)=>A%2===0?c:`<span style="color: ${p.color}">${c}</span>`).join("")},k=async t=>{let e=C(i.value),n=v(t);d.value=S(n,p.keywords),await o.nextTick(),R(i.value,e)},C=t=>{var s;t.focus();let e=(s=document.getSelection())==null?void 0:s.getRangeAt(0),n=e==null?void 0:e.cloneRange();return n==null||n.selectNodeContents(t),n==null||n.setEnd(e==null?void 0:e.endContainer,e==null?void 0:e.endOffset),n==null?void 0:n.toString().length},R=(t,e)=>{let n=getSelection(),s=g(i.value,{pos:e});s&&(s.collapse(!1),n==null||n.removeAllRanges(),n==null||n.addRange(s))},g=(t,e,n)=>{if(n||(n=document.createRange(),n.selectNode(t),n.setStart(t,0)),e.pos===0)n.setEnd(t,e.pos);else if(t&&e.pos>0)if(t.nodeType===Node.TEXT_NODE){let c=t.textContent||"";c.length<e.pos?e.pos-=c.length:(n.setEnd(t,e.pos),e.pos=0)}else for(var s=0;s<t.childNodes.length&&(n=g(t.childNodes[s],e,n),e.pos!==0);s++);return n},H=()=>{u=!0},I=t=>{u=!1,m(t)},m=t=>{if(!u){let e=t.target.innerText;a("update:modelValue",w(e||""))}},K=t=>{u=!0},N=t=>{u=!1};return(t,e)=>(o.openBlock(),o.createElementBlock("div",{ref_key:"inputDom",ref:i,innerHTML:d.value,class:"highlight-input",onInput:m,onCompositionstart:H,onCompositionend:I,contenteditable:"true",onKeydown:o.withKeys(K,["enter"]),onKeyup:o.withKeys(N,["enter"])},null,40,h))}}),D="",f=((r,a)=>{const p=r.__vccOpts||r;for(const[d,i]of a)p[d]=i;return p})(y,[["__scopeId","data-v-cbea2676"]]),x=[f],E={install(r){x.forEach(a=>{r.component(a.name,f)})}};l.HighlightInput=f,l.default=E,Object.defineProperties(l,{__esModule:{value:!0},[Symbol.toStringTag]:{value:"Module"}})});
+(function(global, factory) {
+  typeof exports === "object" && typeof module !== "undefined" ? factory(exports, require("vue")) : typeof define === "function" && define.amd ? define(["exports", "vue"], factory) : (global = typeof globalThis !== "undefined" ? globalThis : global || self, factory(global.highlightInput = {}, global.Vue));
+})(this, function(exports2, vue) {
+  "use strict";
+  const _hoisted_1 = ["innerHTML", "onKeydown"];
+  const __default__ = {
+    name: "HighlightInput"
+  };
+  const _sfc_main = /* @__PURE__ */ vue.defineComponent({
+    ...__default__,
+    props: {
+      modelValue: {
+        type: String,
+        default: ""
+      },
+      keywords: {
+        type: Array,
+        default: []
+      },
+      color: {
+        type: String,
+        default: "#F56C6C"
+      }
+    },
+    emits: ["update:modelValue"],
+    setup(__props, { emit }) {
+      const props = __props;
+      const inputHtml = vue.ref("");
+      const inputDom = vue.ref();
+      let isLock = false;
+      vue.watch(() => props.modelValue, (val) => {
+        formatText(val);
+      });
+      const escapeRegExp = (text) => {
+        return text.replace(/[\-\/\\\^\$\*\+\?\.\(\)\|\[\]\{\}]/g, "\\$&");
+      };
+      const htmlEncode = (str) => {
+        var s = "";
+        if (str.length == 0)
+          return "";
+        s = str.replace(/&/g, "&amp;");
+        s = s.replace(/</g, "&lt;");
+        s = s.replace(/>/g, "&gt;");
+        s = s.replace(/ /g, "&nbsp;");
+        s = s.replace(/\'/g, "&#39;");
+        s = s.replace(/\"/g, "&quot;");
+        s = s.replace(/\n/g, "<br/>");
+        return s;
+      };
+      const htmlDecode = (str) => {
+        var s = "";
+        if (str.length == 0)
+          return "";
+        s = str.replace(/&amp;/g, "&");
+        s = s.replace(/&lt;/g, "<");
+        s = s.replace(/&gt;/g, ">");
+        s = s.replace(/&nbsp;/g, " ");
+        s = s.replace(/&#39;/g, "'");
+        s = s.replace(/&quot;/g, '"');
+        s = s.replace(/<br\/>/g, "\n");
+        return s;
+      };
+      const htmlText = (text, keywords) => {
+        if (!text)
+          return "";
+        const regexp = new RegExp(
+          keywords.map((keyword) => escapeRegExp(String(keyword).trim())).join("|"),
+          "gi"
+        );
+        let textArr = text.replace(/\t/g, "").replace(regexp, "	$&	").split(/\t/);
+        return textArr.map((str, i) => {
+          return i % 2 === 0 ? str : `<span style="color: ${props.color}">${str}</span>`;
+        }).join("");
+      };
+      const formatText = async (text) => {
+        let pos = getCaretPos(inputDom.value);
+        let encodeText = htmlEncode(text);
+        inputHtml.value = htmlText(encodeText, props.keywords);
+        await vue.nextTick();
+        setCaretPos(inputDom.value, pos);
+      };
+      const getCaretPos = (el) => {
+        var _a;
+        el.focus();
+        let range = (_a = document.getSelection()) == null ? void 0 : _a.getRangeAt(0);
+        let rangeClone = range == null ? void 0 : range.cloneRange();
+        rangeClone == null ? void 0 : rangeClone.selectNodeContents(el);
+        rangeClone == null ? void 0 : rangeClone.setEnd(range == null ? void 0 : range.endContainer, range == null ? void 0 : range.endOffset);
+        return countDocumentFragment(rangeClone.cloneContents());
+      };
+      function countDocumentFragment(fragment) {
+        var text = "";
+        var childNodes = fragment.childNodes;
+        for (var i = 0; i < childNodes.length; i++) {
+          var node = childNodes[i];
+          if (node.nodeType === Node.TEXT_NODE) {
+            text += node.textContent;
+          } else if (node.nodeType === Node.ELEMENT_NODE) {
+            text += countCharacterElement(node);
+          }
+        }
+        return text.length;
+      }
+      function countCharacterElement(element) {
+        var text = "";
+        if (element.nodeName === "BR") {
+          return text + " ";
+        }
+        var childNodes = element.childNodes;
+        for (var i = 0; i < childNodes.length; i++) {
+          var node = childNodes[i];
+          if (node.nodeType === Node.TEXT_NODE) {
+            text += node.textContent;
+          } else if (node.nodeType === Node.ELEMENT_NODE) {
+            if (node.nodeName === "BR") {
+              text += " ";
+            } else {
+              text += countCharacterElement(node);
+            }
+          }
+        }
+        return text;
+      }
+      const setCaretPos = (el, pos) => {
+        let selection = getSelection();
+        let range = createRange(inputDom.value, { pos });
+        if (range) {
+          range.collapse(false);
+          selection == null ? void 0 : selection.removeAllRanges();
+          selection == null ? void 0 : selection.addRange(range);
+        }
+      };
+      const createRange = (node, obj, range) => {
+        if (!range) {
+          range = document.createRange();
+          range.selectNode(node);
+          range.setStart(node, 0);
+        }
+        if (obj.pos === 0) {
+          range.setEnd(node, obj.pos);
+        } else if (node && obj.pos > 0) {
+          if (node.nodeType === Node.TEXT_NODE) {
+            let text = node.textContent || "";
+            if (text.length < obj.pos) {
+              obj.pos -= text.length;
+            } else {
+              range.setEnd(node, obj.pos);
+              obj.pos = 0;
+            }
+          } else {
+            if (node.nodeName === "BR") {
+              obj.pos -= 1;
+              if (obj.pos === 0) {
+                range.setEnd(node.nextSibling || node, 0);
+              }
+            } else {
+              for (var lp = 0; lp < node.childNodes.length; lp++) {
+                range = createRange(node.childNodes[lp], obj, range);
+                if (obj.pos === 0) {
+                  break;
+                }
+              }
+            }
+          }
+        }
+        return range;
+      };
+      const onCompositionStart = () => {
+        isLock = true;
+      };
+      const onCompositionEnd = (e) => {
+        isLock = false;
+        onInput(e);
+      };
+      const onInput = (e) => {
+        if (!isLock) {
+          let text = e.target.innerText;
+          emit("update:modelValue", htmlDecode(text || ""));
+        }
+      };
+      const onEnterDown = (event) => {
+        if (!event.shiftKey) {
+          event.preventDefault();
+          var selection = window.getSelection();
+          var range = selection.getRangeAt(0);
+          let pos = getCaretPos(inputDom.value);
+          if (pos === inputDom.value.innerText.length) {
+            var br1 = document.createElement("br");
+            var br2 = document.createElement("br");
+            range.insertNode(br1);
+            range.insertNode(br2);
+            range.setStartAfter(br2);
+            range.setEndAfter(br2);
+          } else {
+            var br1 = document.createElement("br");
+            range.insertNode(br1);
+            range.setStartAfter(br1);
+            range.setEndAfter(br1);
+          }
+        }
+      };
+      return (_ctx, _cache) => {
+        return vue.openBlock(), vue.createElementBlock("div", {
+          ref_key: "inputDom",
+          ref: inputDom,
+          innerHTML: inputHtml.value,
+          class: "highlight-input",
+          onInput,
+          onCompositionstart: onCompositionStart,
+          onCompositionend: onCompositionEnd,
+          contenteditable: "true",
+          onKeydown: vue.withKeys(onEnterDown, ["enter"])
+        }, null, 40, _hoisted_1);
+      };
+    }
+  });
+  const HighlightInput_vue_vue_type_style_index_0_scoped_8a1b4a05_lang = "";
+  const _export_sfc = (sfc, props) => {
+    const target = sfc.__vccOpts || sfc;
+    for (const [key, val] of props) {
+      target[key] = val;
+    }
+    return target;
+  };
+  const HighlightInput = /* @__PURE__ */ _export_sfc(_sfc_main, [["__scopeId", "data-v-8a1b4a05"]]);
+  const component = [HighlightInput];
+  const inpoutComponent = {
+    install(vue2) {
+      component.forEach((item) => {
+        vue2.component(item.name, HighlightInput);
+      });
+    }
+  };
+  exports2.HighlightInput = HighlightInput;
+  exports2.default = inpoutComponent;
+  Object.defineProperties(exports2, { __esModule: { value: true }, [Symbol.toStringTag]: { value: "Module" } });
+});
+//# sourceMappingURL=highlightInput.umd.js.map
