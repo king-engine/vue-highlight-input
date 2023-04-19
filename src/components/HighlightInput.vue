@@ -94,22 +94,63 @@ const formatText = async (text: string) => {
 
   let encodeText = htmlEncode(text)
   inputHtml.value = htmlText(encodeText, props.keywords)
+
   await nextTick()
 
   setCaretPos(inputDom.value, pos)
 }
 
-const getCaretPos = (el: HTMLElement) => {
+// 获取光标偏移，包含换行符
+const getCaretPos = (el: HTMLInputElement) => {
   el.focus()
   let range = document.getSelection()?.getRangeAt(0) as Range
   let rangeClone = range?.cloneRange()
   rangeClone?.selectNodeContents(el)
   rangeClone?.setEnd(range?.endContainer, range?.endOffset)
-  return rangeClone?.toString().length
+  // return rangeClone?.toString().length
+  return countDocumentFragment(rangeClone.cloneContents())
 }
+
+// 计算range所有子节点字符数
+function countDocumentFragment(fragment: DocumentFragment) {
+  var text = '';
+  var childNodes = fragment.childNodes;
+  for (var i = 0; i < childNodes.length; i++) {
+    var node = childNodes[i];
+    if (node.nodeType === Node.TEXT_NODE) {
+      text += node.textContent;
+    } else if (node.nodeType === Node.ELEMENT_NODE) {
+      text += countCharacterElement(node);
+    }
+  }
+  return text.length;
+}
+// 元素节点
+function countCharacterElement(element: Node) {
+  var text = '';
+  if (element.nodeName === 'BR') {
+    return text + ' '
+  }
+  var childNodes = element.childNodes;
+  for (var i = 0; i < childNodes.length; i++) {
+    var node = childNodes[i];
+    if (node.nodeType === Node.TEXT_NODE) {
+      text += node.textContent;
+    } else if (node.nodeType === Node.ELEMENT_NODE) {
+      if (node.nodeName === 'BR') {
+        text += ' '
+      } else {
+        text += countCharacterElement(node);
+      }
+    }
+  }
+  return text;
+}
+
+// 还原光标位置
 const setCaretPos = (el: HTMLElement, pos: number) => {
   let selection = getSelection()
-  let range = createRange(inputDom.value, {pos})
+  let range = createRange(inputDom.value, { pos })
   if (range) {
     range.collapse(false)
     selection?.removeAllRanges()
@@ -117,10 +158,7 @@ const setCaretPos = (el: HTMLElement, pos: number) => {
   }
 }
 
-type PosType = {
-  pos: number
-}
-const createRange = (node: Node, obj:PosType, range?: Range): Range => {
+const createRange = (node: Node, obj: {pos: number}, range?: Range): Range => {
   if (!range) {
     range = document.createRange()
     range.selectNode(node)
@@ -138,10 +176,17 @@ const createRange = (node: Node, obj:PosType, range?: Range): Range => {
         obj.pos = 0
       }
     } else {
-      for (var lp = 0; lp < node.childNodes.length; lp++) {
-        range = createRange(node.childNodes[lp], obj, range)
+      if (node.nodeName === 'BR') {
+        obj.pos -= 1
         if (obj.pos === 0) {
-          break
+          range.setEnd(node.nextSibling || node, 0)
+        }
+      } else {
+        for (var lp = 0; lp < node.childNodes.length; lp++) {
+          range = createRange(node.childNodes[lp], obj, range)
+          if (obj.pos === 0) {
+            break
+          }
         }
       }
     }
@@ -167,12 +212,30 @@ const onInput = (e: Event) => {
     // deFormatText(text)
   }
 }
-const onEnterDown = (e: Event) => {
-  isLock = true
+const onEnterDown = (event: KeyboardEvent) => {
+  // enter 和 shift+enter 表现不一致，需要单独处理换行逻辑
+  if (!event.shiftKey) {
+    event.preventDefault();
+    var selection = window.getSelection() as Selection;
+    var range = selection.getRangeAt(0);
+
+    let pos = getCaretPos(inputDom.value)
+    if (pos === inputDom.value.innerText.length) {
+      var br1 = document.createElement("br");
+      var br2 = document.createElement("br");
+      range.insertNode(br1)
+      range.insertNode(br2)
+      range.setStartAfter(br2);
+      range.setEndAfter(br2);
+    } else {
+      var br1 = document.createElement("br");
+      range.insertNode(br1)
+      range.setStartAfter(br1);
+      range.setEndAfter(br1);
+    }
+  }
 }
-const onEnterUp = (e: Event) => {
-  isLock = false
-}
+
 </script>
 
 <script lang="ts">
@@ -182,7 +245,7 @@ export default {
 </script>
 <template>
   <div ref="inputDom" v-html="inputHtml" class="highlight-input" @input="onInput" @compositionstart="onCompositionStart"
-    @compositionend="onCompositionEnd" contenteditable="true" @keydown.enter="onEnterDown" @keyup.enter="onEnterUp"></div>
+    @compositionend="onCompositionEnd" contenteditable="true" @keydown.enter="onEnterDown"></div>
 </template>
 
 <style scoped lang='scss'>
