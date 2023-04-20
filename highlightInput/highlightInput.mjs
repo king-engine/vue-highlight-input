@@ -1,10 +1,8 @@
-import { defineComponent, ref, watch, nextTick, openBlock, createElementBlock, withKeys } from "vue";
-const _hoisted_1 = ["innerHTML", "onKeydown"];
-const __default__ = {
+import { defineComponent as A, ref as x, watch as k, nextTick as O, onMounted as H, openBlock as L, createElementBlock as I, withKeys as M } from "vue";
+const V = ["innerHTML", "onKeydown"], $ = {
   name: "HighlightInput"
-};
-const _sfc_main = /* @__PURE__ */ defineComponent({
-  ...__default__,
+}, b = /* @__PURE__ */ A({
+  ...$,
   props: {
     modelValue: {
       type: String,
@@ -20,216 +18,127 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
     }
   },
   emits: ["update:modelValue"],
-  setup(__props, { emit }) {
-    const props = __props;
-    const inputHtml = ref("");
-    const inputDom = ref();
-    let isLock = false;
-    watch(() => props.modelValue, (val) => {
-      formatText(val);
+  setup(a, { emit: c }) {
+    const i = a, p = x(""), r = x();
+    let u = !1;
+    k(() => i.modelValue, (n) => {
+      C(n);
     });
-    const escapeRegExp = (text) => {
-      return text.replace(/[\-\/\\\^\$\*\+\?\.\(\)\|\[\]\{\}]/g, "\\$&");
-    };
-    const htmlEncode = (str) => {
-      var s = "";
-      if (str.length == 0)
+    const N = (n) => n.replace(/[\-\/\\\^\$\*\+\?\.\(\)\|\[\]\{\}]/g, "\\$&"), T = (n) => {
+      var e = "";
+      return n.length == 0 ? "" : (e = n.replace(/&/g, "&amp;"), e = e.replace(/</g, "&lt;"), e = e.replace(/>/g, "&gt;"), e = e.replace(/ /g, "&nbsp;"), e = e.replace(/\'/g, "&#39;"), e = e.replace(/\"/g, "&quot;"), e = e.replace(/\n/g, "<br/>"), e);
+    }, g = (n) => {
+      var e = "";
+      return n.length == 0 ? "" : (e = n.replace(/&amp;/g, "&"), e = e.replace(/&lt;/g, "<"), e = e.replace(/&gt;/g, ">"), e = e.replace(/&nbsp;/g, " "), e = e.replace(/&#39;/g, "'"), e = e.replace(/&quot;/g, '"'), e = e.replace(/<br\/>/g, `
+`), e);
+    }, y = (n, e) => {
+      if (!n)
         return "";
-      s = str.replace(/&/g, "&amp;");
-      s = s.replace(/</g, "&lt;");
-      s = s.replace(/>/g, "&gt;");
-      s = s.replace(/ /g, "&nbsp;");
-      s = s.replace(/\'/g, "&#39;");
-      s = s.replace(/\"/g, "&quot;");
-      s = s.replace(/\n/g, "<br/>");
-      return s;
-    };
-    const htmlDecode = (str) => {
-      var s = "";
-      if (str.length == 0)
-        return "";
-      s = str.replace(/&amp;/g, "&");
-      s = s.replace(/&lt;/g, "<");
-      s = s.replace(/&gt;/g, ">");
-      s = s.replace(/&nbsp;/g, " ");
-      s = s.replace(/&#39;/g, "'");
-      s = s.replace(/&quot;/g, '"');
-      s = s.replace(/<br\/>/g, "\n");
-      return s;
-    };
-    const htmlText = (text, keywords) => {
-      if (!text)
-        return "";
-      const regexp = new RegExp(
-        keywords.map((keyword) => escapeRegExp(String(keyword).trim())).join("|"),
+      const t = new RegExp(
+        e.map((l) => N(String(l).trim())).join("|"),
         "gi"
       );
-      let textArr = text.replace(/\t/g, "").replace(regexp, "	$&	").split(/\t/);
-      return textArr.map((str, i) => {
-        return i % 2 === 0 ? str : `<span style="color: ${props.color}">${str}</span>`;
-      }).join("");
+      return n.replace(/\t/g, "").replace(t, "	$&	").split(/\t/).map((l, s) => s % 2 === 0 ? l : `<span style="color: ${i.color}">${l}</span>`).join("");
+    }, C = async (n) => {
+      let e = d(r.value) + f, t = T(n);
+      p.value = y(t, i.keywords), await O(), D(r.value, e), f = 0;
+    }, d = (n) => {
+      var o;
+      n.focus();
+      let e = (o = document.getSelection()) == null ? void 0 : o.getRangeAt(0), t = e == null ? void 0 : e.cloneRange();
+      return t == null || t.selectNodeContents(n), t == null || t.setEnd(e == null ? void 0 : e.endContainer, e == null ? void 0 : e.endOffset), S(t.cloneContents());
     };
-    const formatText = async (text) => {
-      let pos = getCaretPos(inputDom.value);
-      let encodeText = htmlEncode(text);
-      inputHtml.value = htmlText(encodeText, props.keywords);
-      await nextTick();
-      setCaretPos(inputDom.value, pos);
-    };
-    const getCaretPos = (el) => {
-      var _a;
-      el.focus();
-      let range = (_a = document.getSelection()) == null ? void 0 : _a.getRangeAt(0);
-      let rangeClone = range == null ? void 0 : range.cloneRange();
-      rangeClone == null ? void 0 : rangeClone.selectNodeContents(el);
-      rangeClone == null ? void 0 : rangeClone.setEnd(range == null ? void 0 : range.endContainer, range == null ? void 0 : range.endOffset);
-      return countDocumentFragment(rangeClone.cloneContents());
-    };
-    function countDocumentFragment(fragment) {
-      var text = "";
-      var childNodes = fragment.childNodes;
-      for (var i = 0; i < childNodes.length; i++) {
-        var node = childNodes[i];
-        if (node.nodeType === Node.TEXT_NODE) {
-          text += node.textContent;
-        } else if (node.nodeType === Node.ELEMENT_NODE) {
-          text += countCharacterElement(node);
-        }
+    function S(n) {
+      for (var e = "", t = n.childNodes, o = 0; o < t.length; o++) {
+        var l = t[o];
+        l.nodeType === Node.TEXT_NODE ? e += l.textContent : l.nodeType === Node.ELEMENT_NODE && (e += v(l));
       }
-      return text.length;
+      return e.length;
     }
-    function countCharacterElement(element) {
-      var text = "";
-      if (element.nodeName === "BR") {
-        return text + " ";
+    function v(n) {
+      var e = "";
+      if (n.nodeName === "BR")
+        return e + " ";
+      for (var t = n.childNodes, o = 0; o < t.length; o++) {
+        var l = t[o];
+        l.nodeType === Node.TEXT_NODE ? e += l.textContent : l.nodeType === Node.ELEMENT_NODE && (l.nodeName === "BR" ? e += " " : e += v(l));
       }
-      var childNodes = element.childNodes;
-      for (var i = 0; i < childNodes.length; i++) {
-        var node = childNodes[i];
-        if (node.nodeType === Node.TEXT_NODE) {
-          text += node.textContent;
-        } else if (node.nodeType === Node.ELEMENT_NODE) {
-          if (node.nodeName === "BR") {
-            text += " ";
-          } else {
-            text += countCharacterElement(node);
-          }
-        }
-      }
-      return text;
+      return e;
     }
-    const setCaretPos = (el, pos) => {
-      let selection = getSelection();
-      let range = createRange(inputDom.value, { pos });
-      if (range) {
-        range.collapse(false);
-        selection == null ? void 0 : selection.removeAllRanges();
-        selection == null ? void 0 : selection.addRange(range);
+    const D = (n, e) => {
+      let t = getSelection(), o = h(r.value, { pos: e });
+      o && (o.collapse(!1), t == null || t.removeAllRanges(), t == null || t.addRange(o));
+    }, h = (n, e, t) => {
+      if (t || (t = document.createRange(), t.selectNode(n), t.setStart(n, 0)), e.pos === 0)
+        t.setEnd(n, e.pos);
+      else if (n && e.pos > 0)
+        if (n.nodeType === Node.TEXT_NODE) {
+          let l = n.textContent || "";
+          l.length < e.pos ? e.pos -= l.length : (t.setEnd(n, e.pos), e.pos = 0);
+        } else if (n.nodeName === "BR")
+          e.pos -= 1, e.pos === 0 && t.setEnd(n.nextSibling || n, 0);
+        else
+          for (var o = 0; o < n.childNodes.length && (t = h(n.childNodes[o], e, t), e.pos !== 0); o++)
+            ;
+      return t;
+    }, B = () => {
+      u = !0;
+    }, R = (n) => {
+      u = !1, E(n);
+    }, E = (n) => {
+      if (!u) {
+        let e = n.target.innerText;
+        c("update:modelValue", g(e || ""));
       }
-    };
-    const createRange = (node, obj, range) => {
-      if (!range) {
-        range = document.createRange();
-        range.selectNode(node);
-        range.setStart(node, 0);
-      }
-      if (obj.pos === 0) {
-        range.setEnd(node, obj.pos);
-      } else if (node && obj.pos > 0) {
-        if (node.nodeType === Node.TEXT_NODE) {
-          let text = node.textContent || "";
-          if (text.length < obj.pos) {
-            obj.pos -= text.length;
-          } else {
-            range.setEnd(node, obj.pos);
-            obj.pos = 0;
-          }
+    }, w = (n) => {
+      if (!n.shiftKey) {
+        n.preventDefault();
+        var e = window.getSelection(), t = e.getRangeAt(0);
+        let s = t.endContainer, m = s.parentNode || r.value;
+        if (d(r.value) === r.value.innerText.length) {
+          var o = document.createElement("br"), l = document.createElement("br");
+          s.nodeName === "BR" ? (m.insertBefore(o, s.nextSibling), m.insertBefore(l, s.nextSibling), t.setStartBefore(l), t.setEndBefore(l)) : (t.insertNode(o), t.insertNode(l), t.setStartAfter(l), t.setEndAfter(l));
         } else {
-          if (node.nodeName === "BR") {
-            obj.pos -= 1;
-            if (obj.pos === 0) {
-              range.setEnd(node.nextSibling || node, 0);
-            }
-          } else {
-            for (var lp = 0; lp < node.childNodes.length; lp++) {
-              range = createRange(node.childNodes[lp], obj, range);
-              if (obj.pos === 0) {
-                break;
-              }
-            }
-          }
-        }
-      }
-      return range;
-    };
-    const onCompositionStart = () => {
-      isLock = true;
-    };
-    const onCompositionEnd = (e) => {
-      isLock = false;
-      onInput(e);
-    };
-    const onInput = (e) => {
-      if (!isLock) {
-        let text = e.target.innerText;
-        emit("update:modelValue", htmlDecode(text || ""));
-      }
-    };
-    const onEnterDown = (event) => {
-      if (!event.shiftKey) {
-        event.preventDefault();
-        var selection = window.getSelection();
-        var range = selection.getRangeAt(0);
-        let pos = getCaretPos(inputDom.value);
-        if (pos === inputDom.value.innerText.length) {
-          var br1 = document.createElement("br");
-          var br2 = document.createElement("br");
-          range.insertNode(br1);
-          range.insertNode(br2);
-          range.setStartAfter(br2);
-          range.setEndAfter(br2);
-        } else {
-          var br1 = document.createElement("br");
-          range.insertNode(br1);
-          range.setStartAfter(br1);
-          range.setEndAfter(br1);
+          var o = document.createElement("br");
+          s.nodeName === "BR" ? (m.insertBefore(o, s.nextSibling), t.setStartBefore(o), t.setEndBefore(o)) : (t.insertNode(o), t.setStartAfter(o), t.setEndAfter(o));
         }
       }
     };
-    return (_ctx, _cache) => {
-      return openBlock(), createElementBlock("div", {
-        ref_key: "inputDom",
-        ref: inputDom,
-        innerHTML: inputHtml.value,
-        class: "highlight-input",
-        onInput,
-        onCompositionstart: onCompositionStart,
-        onCompositionend: onCompositionEnd,
-        contenteditable: "true",
-        onKeydown: withKeys(onEnterDown, ["enter"])
-      }, null, 40, _hoisted_1);
-    };
+    let f = 0;
+    return H(() => {
+      r.value.addEventListener("paste", (n) => {
+        if (n.preventDefault(), !n.clipboardData)
+          return;
+        const t = n.clipboardData.getData("text").replace(/\r/g, "");
+        let o = d(r.value), l = r.value.innerText, s = l.substr(0, o) + t + l.substr(o);
+        f = t.length, c("update:modelValue", g(s || ""));
+      });
+    }), (n, e) => (L(), I("div", {
+      ref_key: "inputDom",
+      ref: r,
+      innerHTML: p.value,
+      class: "highlight-input",
+      onInput: E,
+      onCompositionstart: B,
+      onCompositionend: R,
+      contenteditable: "true",
+      onKeydown: M(w, ["enter"])
+    }, null, 40, V));
   }
 });
-const HighlightInput_vue_vue_type_style_index_0_scoped_8a1b4a05_lang = "";
-const _export_sfc = (sfc, props) => {
-  const target = sfc.__vccOpts || sfc;
-  for (const [key, val] of props) {
-    target[key] = val;
-  }
-  return target;
-};
-const HighlightInput = /* @__PURE__ */ _export_sfc(_sfc_main, [["__scopeId", "data-v-8a1b4a05"]]);
-const component = [HighlightInput];
-const inpoutComponent = {
-  install(vue) {
-    component.forEach((item) => {
-      vue.component(item.name, HighlightInput);
+const K = (a, c) => {
+  const i = a.__vccOpts || a;
+  for (const [p, r] of c)
+    i[p] = r;
+  return i;
+}, _ = /* @__PURE__ */ K(b, [["__scopeId", "data-v-a2ad3b79"]]), X = [_], P = {
+  install(a) {
+    X.forEach((c) => {
+      a.component(c.name, _);
     });
   }
 };
 export {
-  HighlightInput,
-  inpoutComponent as default
+  _ as HighlightInput,
+  P as default
 };
-//# sourceMappingURL=highlightInput.mjs.map
