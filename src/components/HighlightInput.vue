@@ -5,7 +5,7 @@
  * @params kewords 匹配关键字数组，例：['关键字1', '关键字2']
  * @params color 匹配关键字高亮颜色 例：#333333
  */
-import { nextTick, ref, watch } from 'vue'
+import { nextTick, ref, watch, onMounted } from 'vue'
 const inputHtml = ref('')
 const inputDom = ref()
 let isLock = false
@@ -90,14 +90,16 @@ const debounce = (fn: Function, delay: number) => {
 
 const formatText = async (text: string) => {
 
-  let pos = getCaretPos(inputDom.value)
+  let pos = getCaretPos(inputDom.value) + caretOffset
 
   let encodeText = htmlEncode(text)
+
   inputHtml.value = htmlText(encodeText, props.keywords)
 
   await nextTick()
 
   setCaretPos(inputDom.value, pos)
+  caretOffset = 0
 }
 
 // 获取光标偏移，包含换行符
@@ -158,7 +160,7 @@ const setCaretPos = (el: HTMLElement, pos: number) => {
   }
 }
 
-const createRange = (node: Node, obj: {pos: number}, range?: Range): Range => {
+const createRange = (node: Node, obj: { pos: number }, range?: Range): Range => {
   if (!range) {
     range = document.createRange()
     range.selectNode(node)
@@ -215,26 +217,60 @@ const onInput = (e: Event) => {
 const onEnterDown = (event: KeyboardEvent) => {
   // enter 和 shift+enter 表现不一致，需要单独处理换行逻辑
   if (!event.shiftKey) {
-    event.preventDefault();
-    var selection = window.getSelection() as Selection;
-    var range = selection.getRangeAt(0);
+    event.preventDefault()
+    var selection = window.getSelection() as Selection
+    var range = selection.getRangeAt(0)
+    let endContainer = range.endContainer
+    let parentNode = endContainer.parentNode || inputDom.value
 
     let pos = getCaretPos(inputDom.value)
     if (pos === inputDom.value.innerText.length) {
-      var br1 = document.createElement("br");
-      var br2 = document.createElement("br");
-      range.insertNode(br1)
-      range.insertNode(br2)
-      range.setStartAfter(br2);
-      range.setEndAfter(br2);
+      var br1 = document.createElement("br")
+      var br2 = document.createElement("br")
+
+      if (endContainer.nodeName === 'BR') {
+
+        parentNode.insertBefore(br1, endContainer.nextSibling)
+        parentNode.insertBefore(br2, endContainer.nextSibling)
+        range.setStartBefore(br2)
+        range.setEndBefore(br2)
+      } else {
+        range.insertNode(br1)
+        range.insertNode(br2)
+        range.setStartAfter(br2)
+        range.setEndAfter(br2)
+      }
+
     } else {
       var br1 = document.createElement("br");
-      range.insertNode(br1)
-      range.setStartAfter(br1);
-      range.setEndAfter(br1);
+
+      if (endContainer.nodeName === 'BR') {
+        parentNode.insertBefore(br1, endContainer.nextSibling)
+        range.setStartBefore(br1)
+        range.setEndBefore(br1)
+      } else {
+        range.insertNode(br1)
+        range.setStartAfter(br1)
+        range.setEndAfter(br1)
+      }
+
     }
   }
 }
+let caretOffset = 0
+onMounted(() => {
+  inputDom.value.addEventListener("paste", (e: ClipboardEvent) => {
+    e.preventDefault()
+    if(!e.clipboardData) return
+    const text = e.clipboardData.getData('text')
+    const cleanedText = text.replace(/\r/g, '')
+    let pos = getCaretPos(inputDom.value)
+    let innerText = inputDom.value.innerText
+    let inputText = innerText.substr(0, pos) + cleanedText + innerText.substr(pos)
+    caretOffset = cleanedText.length
+    emit('update:modelValue', htmlDecode( inputText|| ''))
+  });
+})
 
 </script>
 
