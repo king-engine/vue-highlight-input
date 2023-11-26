@@ -1,6 +1,6 @@
 {
   "name": "vue-highlight-input",
-  "version": "0.0.1",
+  "version": "1.0.11",
   "private": true,
   "scripts": {
     "dev": "vite",
